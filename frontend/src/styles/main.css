@@ -1,0 +1,13 @@
+/* Main Stylesheet - Imports all modular CSS files */
+
+/* Base styles (variables, reset, typography) */
+@import url("./base.css");
+
+/* Component-specific styles */
+@import url("./components/home.css");
+@import url("./components/lesson.css");
+@import url("./components/course-overview.css");
+@import url("./components/progress-tracker.css");
+
+/* Utility classes */
+@import url("./utils.css");

@@ -1,0 +1,49 @@
+/* Utility Styles */
+
+/* Error Styles */
+.error {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  border: 1px solid #fecaca;
+  font-size: var(--font-size-sm);
+}
+
+/* Material Icons Styling */
+.material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+/* Header Icons */
+.header-icon {
+  margin-right: var(--space-2);
+  vertical-align: middle;
+}
+
+/* Section Icons */
+.section-icon {
+  margin-right: var(--space-2);
+  font-size: 20px;
+}
+
+/* Responsive Container adjustments */
+@media (max-width: 1024px) {
+  .container {
+    padding: var(--space-4);
+  }
+}

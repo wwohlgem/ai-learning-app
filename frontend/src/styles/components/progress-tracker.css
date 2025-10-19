@@ -1,0 +1,276 @@
+/* Progress Tracker Component Styles */
+
+.progress-tracker {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+}
+
+.progress-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.progress-header h2 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.overall-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.stages-container {
+  position: relative;
+}
+
+.progress-stage {
+  position: relative;
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #e9ecef;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.progress-stage.pending {
+  border-color: #e9ecef;
+  background: #f8f9fa;
+}
+
+.progress-stage.running {
+  border-color: #007bff;
+  background: #e3f2fd;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.progress-stage.completed {
+  border-color: #28a745;
+  background: #e8f5e8;
+}
+
+.progress-stage.error {
+  border-color: #dc3545;
+  background: #f8d7da;
+}
+
+.stage-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.stage-icon {
+  font-size: 24px;
+  min-width: 32px;
+  text-align: center;
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.stage-info p {
+  margin: 0 0 8px 0;
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.stage-details {
+  font-size: 12px;
+  color: #495057;
+  font-style: italic;
+  margin-top: 5px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+
+.stage-progress {
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.stage-progress-fill {
+  height: 100%;
+  background: #007bff;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.stage-connector {
+  position: absolute;
+  left: 35px;
+  bottom: -15px;
+  width: 2px;
+  height: 15px;
+  background: #e9ecef;
+  transition: background-color 0.3s ease;
+}
+
+.stage-connector.completed {
+  background: #28a745;
+}
+
+.current-activity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 15px 20px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #856404;
+}
+
+.activity-indicator {
+  position: relative;
+  width: 12px;
+  height: 12px;
+}
+
+.pulse {
+  width: 12px;
+  height: 12px;
+  background: #ffc107;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.spinner-small {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Stage Icons */
+.stage-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+}
+
+.stage-icon-completed {
+  color: #28a745;
+  font-size: 24px;
+}
+
+.stage-icon-running {
+  color: #007bff;
+  font-size: 24px;
+  animation: spin 2s linear infinite;
+}
+
+.stage-icon-error {
+  color: #dc3545;
+  font-size: 24px;
+}
+
+.stage-icon-pending {
+  color: #6c757d;
+  font-size: 24px;
+}
+
+/* Responsive adjustments for progress tracker */
+@media (max-width: 768px) {
+  .progress-tracker {
+    margin: 20px 10px;
+    padding: 20px;
+  }
+
+  .progress-header h2 {
+    font-size: 20px;
+  }
+
+  .stage-header {
+    gap: 10px;
+  }
+
+  .stage-info h3 {
+    font-size: 16px;
+  }
+
+  .stage-connector {
+    left: 25px;
+  }
+}
