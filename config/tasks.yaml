@@ -1,0 +1,108 @@
+build_curriculum:
+  description: >
+    Create ONLY lesson outlines for the subject "{subject}" with {num_lessons} lesson(s).
+
+    DO NOT write any lesson content - only create structured outlines.
+
+    Your task is to:
+    1. Create a logical progression of lesson topics that build upon each other
+    2. Define clear learning objectives for each lesson  
+    3. List key topics to be covered in each lesson
+    4. Provide a brief description of what will be covered
+
+    Output MUST be a JSON object with this EXACT structure:
+    {{
+      "curriculum": {{
+        "lesson_1_outline": {{
+          "title": "Lesson 1 Title",
+          "learning_objectives": ["objective 1", "objective 2"],
+          "key_topics": ["topic 1", "topic 2", "topic 3"],
+          "description": "Brief description of lesson focus and goals"
+        }},
+        "lesson_2_outline": {{
+          "title": "Lesson 2 Title", 
+          "learning_objectives": ["objective 1", "objective 2"],
+          "key_topics": ["topic 1", "topic 2", "topic 3"],
+          "description": "Brief description of lesson focus and goals"
+        }}
+      }}
+    }}
+
+    Remember: Create outlines only, no actual lesson content!
+  expected_output: >
+    A valid JSON object with curriculum containing only lesson outlines (no content) 
+    with titles, objectives, key topics, and descriptions.
+
+create_lesson_content:
+  description: >
+    Take the curriculum outlines and create full lesson content by researching each topic thoroughly.
+
+    You will receive curriculum outlines from the previous agent. For each lesson outline:
+    1. Use the search tool to research the key topics extensively
+    2. Gather current, accurate information from multiple sources
+    3. Write comprehensive educational content in paragraph form
+    4. Ensure content is detailed, engaging, and educational
+
+    Output MUST be a JSON object with this EXACT structure:
+    {{
+      "lessons": {{
+        "lesson_1": {{
+          "title": "Lesson 1 Title (from curriculum)",
+          "content": "Comprehensive paragraph-form lesson content based on research..."
+        }},
+        "lesson_2": {{
+          "title": "Lesson 2 Title (from curriculum)", 
+          "content": "Comprehensive paragraph-form lesson content based on research..."
+        }}
+      }}
+    }}
+
+    Make extensive use of the search tool to ensure content is accurate and current.
+    Write detailed, educational paragraphs - not bullet points or outlines.
+  expected_output: >
+    A valid JSON object with lessons containing comprehensive paragraph-form content
+    for each lesson based on thorough research.
+
+structure_final_course:
+  description: >
+    Take the lesson content and structure it into the final course format for the frontend.
+
+    You will receive lesson content from the previous agent. For each lesson:
+    1. Extract 3-5 key concepts that students should understand
+    2. Identify important terms and provide clear definitions
+    3. Organize the content into readable lesson text with proper paragraph breaks
+    4. Ensure everything is structured for optimal learning
+
+    IMPORTANT: For the main_lesson_text field, break up the content into logical paragraphs
+    separated by double line breaks (\n\n). This will improve readability on the frontend.
+    Each paragraph should focus on a specific aspect or concept.
+
+    Output MUST be a JSON object with this EXACT structure:
+    {{
+      "course": {{
+        "lesson_1": {{
+          "title": "Lesson 1 Title",
+          "key_concepts": ["concept 1", "concept 2", "concept 3"],
+          "key_terms": {{
+            "term1": "definition of term1",
+            "term2": "definition of term2"
+          }},
+          "main_lesson_text": "First paragraph about the topic...\n\nSecond paragraph expanding on concepts...\n\nThird paragraph with examples and applications..."
+        }},
+        "lesson_2": {{
+          "title": "Lesson 2 Title",
+          "key_concepts": ["concept 1", "concept 2", "concept 3"],
+          "key_terms": {{
+            "term1": "definition of term1",
+            "term2": "definition of term2"
+          }},
+          "main_lesson_text": "First paragraph about the topic...\n\nSecond paragraph expanding on concepts...\n\nThird paragraph with examples and applications..."
+        }}
+      }}
+    }}
+
+    This is the final output that will be displayed to students in the React frontend.
+  expected_output: >
+    A valid JSON object with the final structured course containing key concepts,
+    key terms with definitions, and well-formatted lesson text with paragraph breaks
+    ready for student consumption.
