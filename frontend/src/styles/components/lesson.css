@@ -278,13 +278,6 @@
     align-items: center;
   }
 
-  .lesson-progress {
-    width: calc(100% - 2 * var(--space-4));
-    max-width: 600px;
-    margin: 0 auto var(--space-6) auto;
-    padding: 0;
-  }
-
   .lesson-section {
     order: 0;
   }
@@ -314,8 +307,8 @@
   }
 
   .lesson-progress {
-    width: calc(100% - 2 * var(--space-2));
-    margin: 0 var(--space-2) var(--space-4) var(--space-2);
+    width: 100%;
+    margin: 0 auto var(--space-4) auto;
     padding: 0;
   }
 }
