@@ -4,11 +4,11 @@
 /* CSS Custom Properties (Variables) */
 :root {
   /* Modern muted color palette with minty green-grey */
-  --color-primary: #568b89;
-  --color-primary-light: #568b89;
-  --color-primary-dark: #568b89;
+  --color-primary: #7c9594;
+  --color-primary-light: #839999;
+  --color-primary-dark: #798e8d;
   --color-secondary: #6b7280;
-  --color-accent: #4a9b9b;
+  --color-accent: #759a9a;
 
   /* Neutral colors */
   --color-gray-50: #f9fafb;
