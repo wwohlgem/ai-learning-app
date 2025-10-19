@@ -76,6 +76,20 @@ class LearningAppCrew:
         
         return curriculum_builder, lesson_builder, content_reviewer
     
+    def _create_assessment_agent(self):
+        """Create assessment builder agent"""
+        assessment_builder = Agent(
+            role=self.agents_config['assessment_builder']['role'],
+            goal=self.agents_config['assessment_builder']['goal'],
+            backstory=self.agents_config['assessment_builder']['backstory'],
+            llm=self.llm,
+            verbose=True,
+            allow_delegation=False,
+            max_iter=3
+        )
+        
+        return assessment_builder
+    
     def _create_tasks_with_progress(self, subject: str, num_lessons: int, agents):
         """Create tasks with progress tracking callbacks"""
         curriculum_builder, lesson_builder, content_reviewer = agents
@@ -234,6 +248,137 @@ class LearningAppCrew:
                 "error": f"Could not parse result as JSON: {str(e)}",
                 "raw_result": str(raw_result)[:1000] + "..." if len(str(raw_result)) > 1000 else str(raw_result)
             }
+    
+    def build_assessment(self, course_file_path: str):
+        """Build an assessment based on a completed course"""
+        print(f"Starting assessment creation for course: {course_file_path}")
+        
+        # Create assessments subdirectory
+        assessments_path = self.outputs_path / "assessments"
+        assessments_path.mkdir(exist_ok=True)
+        
+        try:
+            # Set progress tracker to assessment mode and start
+            progress_tracker.set_mode("assessment")
+            progress_tracker.start_stage("assessment_building", "Loading and analyzing course content...")
+            
+            # Load the course content with markdown handling
+            with open(course_file_path, 'r') as f:
+                content = f.read().strip()
+                
+            # Handle files that have markdown code block wrappers
+            if content.startswith('```json'):
+                lines = content.split('\n')
+                if lines[-1].strip() == '```':
+                    content = '\n'.join(lines[1:-1])
+                else:
+                    content = '\n'.join(lines[1:])
+            
+            if not content:
+                raise ValueError("Course file is empty or corrupted")
+                
+            course_content = json.loads(content)
+            
+            # Extract subject from filename for assessment title
+            filename = Path(course_file_path).stem
+            subject = filename.replace('course_', '').replace('_', ' ').title()
+            
+            # Complete first stage and move to question generation
+            progress_tracker.complete_stage("assessment_building", "Course content analyzed successfully")
+            progress_tracker.start_stage("question_generation", "Creating assessment questions based on lesson content...")
+            
+            # Create assessment agent
+            assessment_agent = self._create_assessment_agent()
+            
+            # Create assessment task with course content included in description
+            course_content_str = json.dumps(course_content, indent=2)
+            assessment_description = f"{self.tasks_config['build_assessment']['description']}\n\nCOURSE CONTENT TO ANALYZE:\n{course_content_str}"
+            
+            assessment_task = Task(
+                description=assessment_description,
+                expected_output=self.tasks_config['build_assessment']['expected_output'],
+                agent=assessment_agent
+            )
+            
+            # Create and run crew for assessment
+            assessment_crew = Crew(
+                agents=[assessment_agent],
+                tasks=[assessment_task],
+                process=Process.sequential,
+                verbose=True
+            )
+            
+            # Execute assessment creation
+            result = assessment_crew.kickoff()
+            
+            # Complete question generation and start finalization
+            progress_tracker.complete_stage("question_generation", "Assessment questions generated")
+            progress_tracker.start_stage("assessment_finalization", "Finalizing and structuring assessment...")
+            
+            # Extract result
+            if hasattr(result, 'raw'):
+                raw_result = result.raw
+            elif hasattr(result, 'result'):
+                raw_result = result.result
+            else:
+                raw_result = str(result)
+            
+            # Save assessment result
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            assessment_file = assessments_path / f"assessment_{subject.replace(' ', '_')}_{timestamp}.json"
+            
+            # Parse and save JSON
+            try:
+                if isinstance(raw_result, str):
+                    # Strip markdown code blocks if present
+                    cleaned_result = raw_result.strip()
+                    if cleaned_result.startswith('```json'):
+                        cleaned_result = cleaned_result[7:]
+                    if cleaned_result.startswith('```'):
+                        cleaned_result = cleaned_result[3:]
+                    if cleaned_result.endswith('```'):
+                        cleaned_result = cleaned_result[:-3]
+                    cleaned_result = cleaned_result.strip()
+                    
+                    json_result = json.loads(cleaned_result)
+                elif isinstance(raw_result, dict):
+                    json_result = raw_result
+                else:
+                    cleaned_result = str(raw_result).strip()
+                    if cleaned_result.startswith('```json'):
+                        cleaned_result = cleaned_result[7:]
+                    if cleaned_result.startswith('```'):
+                        cleaned_result = cleaned_result[3:]
+                    if cleaned_result.endswith('```'):
+                        cleaned_result = cleaned_result[:-3]
+                    cleaned_result = cleaned_result.strip()
+                    
+                    json_result = json.loads(cleaned_result)
+                
+                with open(assessment_file, 'w') as f:
+                    json.dump(json_result, f, indent=2)
+                
+                progress_tracker.complete_stage("assessment_finalization", f"Assessment saved to: {assessment_file}")
+                print(f"Assessment creation completed! Result saved to: {assessment_file}")
+                return json_result
+                
+            except json.JSONDecodeError as e:
+                # Save as text if JSON parsing fails
+                with open(assessment_file.with_suffix('.txt'), 'w') as f:
+                    f.write(str(raw_result))
+                
+                progress_tracker.error_stage("assessment_building", f"JSON parsing error: {str(e)}")
+                print(f"Assessment saved as text due to JSON error: {e}")
+                
+                return {
+                    "error": f"Could not parse assessment result as JSON: {str(e)}",
+                    "raw_result": str(raw_result)[:1000] + "..." if len(str(raw_result)) > 1000 else str(raw_result)
+                }
+                
+        except Exception as e:
+            progress_tracker.error_stage("assessment_building", str(e))
+            print(f"Error creating assessment: {e}")
+            raise e
 
 def main():
     """Example usage"""

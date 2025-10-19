@@ -112,3 +112,54 @@ structure_final_course:
     A valid JSON object with the final structured course containing key concepts,
     key terms with definitions, and well-formatted lesson text with paragraph breaks
     ready for student consumption.
+
+build_assessment:
+  description: >
+    Create a comprehensive assessment based STRICTLY on the provided lesson content.
+
+    You will receive the completed course content. Your task is to:
+    1. Analyze ALL lessons in the course to understand the complete scope of content
+    2. Create 8-12 assessment questions that test understanding of the material
+    3. Use a mix of question types: multiple choice (70%) and true/false (30%)
+    4. Ensure questions cover key concepts, key terms, and main lesson content
+    5. Create questions at varying difficulty levels (easy, medium, hard)
+    6. ONLY create questions based on information explicitly covered in the lessons
+    7. Provide clear, educational explanations for correct answers
+    8. Ensure all multiple choice options are plausible and related to the content
+
+    CRITICAL RULES:
+    - DO NOT create questions about topics not covered in the provided lessons
+    - DO NOT assume knowledge beyond what's taught in the course
+    - Base all questions strictly on the lesson content provided
+    - Make sure correct answers are clearly supported by the lesson text
+
+    Output MUST be a JSON object with this EXACT structure:
+    {{
+      "assessment": {{
+        "title": "Assessment: [Course Subject]",
+        "description": "Test your understanding of the key concepts from this course",
+        "questions": [
+          {{
+            "id": 1,
+            "type": "multiple_choice",
+            "question": "Question text here?",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correct_answer": 0,
+            "explanation": "Detailed explanation of why this is correct, referencing the lesson content",
+            "difficulty": "easy"
+          }},
+          {{
+            "id": 2,
+            "type": "true_false",
+            "question": "Statement to evaluate as true or false",
+            "correct_answer": true,
+            "explanation": "Explanation of why this statement is true/false based on lesson content",
+            "difficulty": "medium"
+          }}
+        ]
+      }}
+    }}
+  expected_output: >
+    A valid JSON object with a comprehensive assessment containing 8-12 questions
+    of mixed types, all based strictly on the provided lesson content, with clear
+    explanations and appropriate difficulty levels.

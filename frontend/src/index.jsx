@@ -5,6 +5,7 @@ const SCREENS = {
   HOME: "home",
   COURSE_OVERVIEW: "course_overview",
   LESSON: "lesson",
+  ASSESSMENT: "assessment",
 };
 
 // Material Icon component
@@ -17,7 +18,11 @@ function MaterialIcon({ icon, className = "", style = {} }) {
 }
 
 // ProgressTracker Component
-function ProgressTracker({ isVisible, onComplete }) {
+function ProgressTracker({
+  isVisible,
+  onComplete,
+  title = "AI Agents Creating Your Course",
+}) {
   const [progress, setProgress] = useState({
     stages: [],
     current_stage: null,
@@ -94,7 +99,7 @@ function ProgressTracker({ isVisible, onComplete }) {
       <div className="progress-header">
         <h2>
           <MaterialIcon icon="psychology" className="header-icon" />
-          AI Agents Creating Your Course
+          {title}
         </h2>
         <div className="overall-progress">
           <div className="progress-bar">
@@ -382,6 +387,7 @@ function Lesson({
   onPreviousLesson,
   onBackToCourse,
   onBackToHome,
+  onBuildAssessment,
 }) {
   if (!lesson) return null;
 
@@ -474,7 +480,7 @@ function Lesson({
               </p>
               <button
                 className="assessment-btn-small"
-                onClick={() => console.log("Assessment clicked")}
+                onClick={onBuildAssessment}
               >
                 <MaterialIcon icon="quiz" className="btn-icon" />
                 Build Assessment
@@ -495,7 +501,7 @@ function Lesson({
               </button>
             ) : (
               <button className="nav-btn primary" onClick={onBackToHome}>
-                Complete Course & Back to Home
+                Back to Home
               </button>
             )}
           </div>
@@ -512,6 +518,9 @@ function App() {
   const [subject, setSubject] = useState("");
   const [numLessons, setNumLessons] = useState(1);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+  const [assessmentData, setAssessmentData] = useState(null);
+  const [showAssessmentProgress, setShowAssessmentProgress] = useState(false);
+  const [courseFileName, setCourseFileName] = useState(null);
 
   // Navigation functions
   const handleCourseCreate = ({ courseData, subject, numLessons }) => {
@@ -549,6 +558,73 @@ function App() {
     setSubject("");
     setNumLessons(1);
     setCurrentLessonIndex(0);
+    setAssessmentData(null);
+    setCourseFileName(null);
+  };
+
+  // Assessment building functionality
+  const handleBuildAssessment = async () => {
+    setShowAssessmentProgress(true);
+
+    try {
+      // If we don't have a specific course filename, get the most recent course
+      let filename = courseFileName;
+      if (!filename) {
+        // Fetch the list of courses to get the most recent one
+        const coursesResponse = await fetch("/api/courses");
+        const coursesData = await coursesResponse.json();
+
+        if (coursesData.courses && coursesData.courses.length > 0) {
+          // Use the most recent course (first in the sorted list)
+          filename = coursesData.courses[0].filename;
+        } else {
+          throw new Error(
+            "No course files found. Please create a course first."
+          );
+        }
+      }
+
+      const response = await fetch("/api/build-assessment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          courseFilename: filename,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to build assessment");
+      }
+
+      if (data.success && data.assessment_data) {
+        setAssessmentData(data.assessment_data);
+        // Navigate to assessment screen after building
+        setTimeout(() => {
+          setShowAssessmentProgress(false);
+          setCurrentScreen(SCREENS.ASSESSMENT);
+        }, 1000);
+      } else {
+        throw new Error("Invalid assessment response from server");
+      }
+    } catch (error) {
+      console.error("Assessment building error:", error);
+      setShowAssessmentProgress(false);
+      // Could add error state here if needed
+    }
+  };
+
+  const handleAssessmentComplete = () => {
+    // Handle assessment completion - could track scores, etc.
+    setCurrentScreen(SCREENS.HOME);
+  };
+
+  const handleAssessmentProgress = () => {
+    setShowAssessmentProgress(false);
+    setCurrentScreen(SCREENS.ASSESSMENT);
   };
 
   // Get current lesson data
@@ -589,6 +665,16 @@ function App() {
             onPreviousLesson={handlePreviousLesson}
             onBackToCourse={handleBackToCourse}
             onBackToHome={handleBackToHome}
+            onBuildAssessment={handleBuildAssessment}
+          />
+        );
+
+      case SCREENS.ASSESSMENT:
+        return (
+          <Assessment
+            assessment={assessmentData?.assessment}
+            onComplete={handleAssessmentComplete}
+            onBackToCourse={handleBackToCourse}
           />
         );
 
@@ -597,7 +683,20 @@ function App() {
     }
   };
 
-  return renderCurrentScreen();
+  return (
+    <div>
+      {renderCurrentScreen()}
+
+      {/* Assessment Progress Tracker */}
+      {showAssessmentProgress && (
+        <ProgressTracker
+          isVisible={showAssessmentProgress}
+          onComplete={handleAssessmentProgress}
+          title="AI Agent Building Your Assessment"
+        />
+      )}
+    </div>
+  );
 }
 
 // Render the app

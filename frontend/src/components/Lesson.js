@@ -136,7 +136,7 @@ function Lesson({
               </button>
             ) : (
               <button className="nav-btn primary" onClick={onBackToHome}>
-                Complete Course & Back to Home
+                Back to Home
               </button>
             )}
           </div>

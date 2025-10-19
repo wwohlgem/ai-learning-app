@@ -220,6 +220,111 @@ def get_output(filename):
     except Exception as e:
         return jsonify({'error': f'Failed to get output: {str(e)}'}), 500
 
+@app.route('/api/build-assessment', methods=['POST'])
+def build_assessment():
+    """API endpoint to build an assessment for a completed course"""
+    try:
+        data = request.get_json()
+        course_filename = data.get('courseFilename', '').strip()
+        
+        if not course_filename:
+            return jsonify({'error': 'Course filename is required'}), 400
+        
+        # Construct full path to course file
+        outputs_dir = Path(__file__).parent.parent / 'outputs'
+        course_file_path = outputs_dir / course_filename
+        
+        if not course_file_path.exists():
+            return jsonify({'error': 'Course file not found'}), 404
+        
+        # Reset progress tracker for new assessment creation
+        progress_tracker.reset()
+        
+        # Build assessment using CrewAI
+        print(f"Building assessment for course: {course_filename}")
+        result = crew.build_assessment(str(course_file_path))
+        
+        # Check if assessment building failed
+        if isinstance(result, dict) and 'error' in result:
+            return jsonify({
+                'error': result['error'],
+                'raw_result': result.get('raw_result', '')
+            }), 500
+        
+        # Validate that we have a proper assessment structure
+        if not isinstance(result, dict) or 'assessment' not in result:
+            return jsonify({
+                'error': 'Invalid assessment data format - missing assessment structure',
+                'received_data': str(result)[:500] + "..." if len(str(result)) > 500 else str(result)
+            }), 500
+        
+        return jsonify({
+            'success': True,
+            'assessment_data': result
+        })
+        
+    except Exception as e:
+        print(f"Error building assessment: {str(e)}")
+        return jsonify({
+            'error': f'Failed to build assessment: {str(e)}'
+        }), 500
+
+@app.route('/api/assessments')
+def get_assessments():
+    """Get all assessments from outputs/assessments directory"""
+    try:
+        assessments_dir = Path(__file__).parent.parent / 'outputs' / 'assessments'
+        if not assessments_dir.exists():
+            return jsonify({'assessments': []})
+        
+        assessments = []
+        for file_path in assessments_dir.glob('assessment_*.json'):
+            try:
+                with open(file_path, 'r') as f:
+                    content = f.read().strip()
+                    
+                # Handle files that have markdown code block wrappers
+                if content.startswith('```json'):
+                    lines = content.split('\n')
+                    if lines[-1].strip() == '```':
+                        content = '\n'.join(lines[1:-1])
+                    else:
+                        content = '\n'.join(lines[1:])
+                
+                data = json.loads(content)
+                
+                # Extract assessment info from filename
+                filename = file_path.name
+                
+                # Get subject from filename
+                subject_from_filename = filename.replace('assessment_', '').split('_')
+                subject = ' '.join(subject_from_filename[:-2]).replace('_', ' ').title()  # Remove timestamp parts
+                
+                # Get creation time
+                created_time = file_path.stat().st_mtime
+                
+                # Get question count
+                question_count = len(data.get('assessment', {}).get('questions', []))
+                
+                assessments.append({
+                    'id': filename.replace('.json', ''),
+                    'filename': filename,
+                    'subject': subject,
+                    'question_count': question_count,
+                    'created': created_time,
+                    'assessment_data': data
+                })
+            except Exception as e:
+                print(f"Error processing assessment file {file_path}: {e}")
+                continue
+        
+        # Sort by creation time, newest first
+        assessments.sort(key=lambda x: x['created'], reverse=True)
+        return jsonify({'assessments': assessments})
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to get assessments: {str(e)}'}), 500
+
 @app.route('/api/progress')
 def get_progress():
     """Get current progress state"""
@@ -230,6 +335,9 @@ if __name__ == '__main__':
     print("Frontend available at: http://localhost:5000")
     print("API endpoints:")
     print("  POST /api/create-course - Create a new course")
+    print("  POST /api/build-assessment - Build assessment for a course")
+    print("  GET /api/courses - List all final courses")
+    print("  GET /api/assessments - List all assessments")
     print("  GET /api/outputs - List all generated outputs")
     print("  GET /api/outputs/<filename> - Get specific output")
     print("  GET /api/progress - Get current progress state")

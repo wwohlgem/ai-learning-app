@@ -32,7 +32,11 @@ class ProgressTracker:
         self._initialize_stages()
     
     def _initialize_stages(self):
-        """Initialize the standard progress stages"""
+        """Initialize the standard progress stages for course creation"""
+        self._set_course_creation_stages()
+    
+    def _set_course_creation_stages(self):
+        """Set stages for course creation"""
         stages_config = [
             {
                 "id": "curriculum_building",
@@ -56,6 +60,7 @@ class ProgressTracker:
             }
         ]
         
+        self.stages.clear()
         for stage_config in stages_config:
             stage = ProgressStage(
                 id=stage_config["id"],
@@ -64,6 +69,48 @@ class ProgressTracker:
                 status="pending"
             )
             self.stages[stage.id] = stage
+    
+    def _set_assessment_building_stages(self):
+        """Set stages for assessment building"""
+        stages_config = [
+            {
+                "id": "assessment_building",
+                "title": "Analyzing Course Content",
+                "description": "AI agent is analyzing your completed lessons to understand what you learned..."
+            },
+            {
+                "id": "question_generation",
+                "title": "Generating Questions",
+                "description": "AI agent is creating assessment questions based on your lesson content..."
+            },
+            {
+                "id": "assessment_finalization",
+                "title": "Finalizing Assessment",
+                "description": "Structuring questions and preparing your personalized assessment..."
+            }
+        ]
+        
+        self.stages.clear()
+        for stage_config in stages_config:
+            stage = ProgressStage(
+                id=stage_config["id"],
+                title=stage_config["title"],
+                description=stage_config["description"],
+                status="pending"
+            )
+            self.stages[stage.id] = stage
+    
+    def set_mode(self, mode: str):
+        """Set the progress tracker mode ('course' or 'assessment')"""
+        if mode == "course":
+            self._set_course_creation_stages()
+        elif mode == "assessment":
+            self._set_assessment_building_stages()
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+        
+        self.current_stage = None
+        self._broadcast_update()
     
     def add_callback(self, callback: Callable):
         """Add a callback function to receive progress updates"""
