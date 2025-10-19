@@ -332,7 +332,7 @@ def get_progress():
 
 if __name__ == '__main__':
     print("Starting AI Learning App server...")
-    print("Frontend available at: http://localhost:5000")
+    print("Frontend available at: http://localhost:8000")
     print("API endpoints:")
     print("  POST /api/create-course - Create a new course")
     print("  POST /api/build-assessment - Build assessment for a course")
@@ -344,4 +344,4 @@ if __name__ == '__main__':
     print("WebSocket events:")
     print("  progress_update - Real-time progress updates")
     
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=8000)

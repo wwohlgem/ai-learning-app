@@ -151,7 +151,8 @@ class LearningAppCrew:
         print(f"Starting course creation for: {subject} with {num_lessons} lessons")
         
         try:
-            # Start the overall process
+            # Set progress tracker to course mode and start the overall process
+            progress_tracker.set_mode("course")
             progress_tracker.start_stage("curriculum_building", f"Creating curriculum for: {subject}")
             
             # Create agents
