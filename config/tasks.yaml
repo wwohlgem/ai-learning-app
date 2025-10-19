@@ -35,33 +35,39 @@ build_curriculum:
 
 create_lesson_content:
   description: >
-    Take the curriculum outlines and create full lesson content by researching each topic thoroughly.
+    Take the curriculum outlines and create engaging, educational lesson content by researching each topic thoroughly.
 
     You will receive curriculum outlines from the previous agent. For each lesson outline:
     1. Use the search tool to research the key topics extensively
-    2. Gather current, accurate information from multiple sources
-    3. Write comprehensive educational content in paragraph form
-    4. Ensure content is detailed, engaging, and educational
+    2. Gather specific facts, examples, and detailed information
+    3. Write as if you are teaching the student directly - use "you will learn", "let's explore", etc.
+    4. Include concrete examples, specific details, dates, names, and real-world applications
+    5. Write in an engaging, educational tone that teaches the subject matter
+
+    CRITICAL: Do NOT write meta-descriptions about what the lesson covers. Instead, write the actual lesson content that teaches the subject.
+
+    For example:
+    - BAD: "This lesson introduces students to the significance of art history and encourages exploration..."
+    - GOOD: "Welcome to your journey through art history! Let's begin by exploring how art reflects the societies that created it. When you look at a Renaissance painting like da Vinci's Mona Lisa, you're seeing more than just a portrait..."
 
     Output MUST be a JSON object with this EXACT structure:
     {{
       "lessons": {{
         "lesson_1": {{
           "title": "Lesson 1 Title (from curriculum)",
-          "content": "Comprehensive paragraph-form lesson content based on research..."
+          "content": "Direct teaching content with specific facts, examples, and engaging explanations..."
         }},
         "lesson_2": {{
           "title": "Lesson 2 Title (from curriculum)", 
-          "content": "Comprehensive paragraph-form lesson content based on research..."
+          "content": "Direct teaching content with specific facts, examples, and engaging explanations..."
         }}
       }}
     }}
-
     Make extensive use of the search tool to ensure content is accurate and current.
-    Write detailed, educational paragraphs - not bullet points or outlines.
+    Write detailed, educational content that actually teaches the subject - not descriptions of what will be taught.
   expected_output: >
-    A valid JSON object with lessons containing comprehensive paragraph-form content
-    for each lesson based on thorough research.
+    A valid JSON object with lessons containing engaging, direct teaching content
+    with specific facts, examples, and educational material.
 
 structure_final_course:
   description: >

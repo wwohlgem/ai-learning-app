@@ -7,12 +7,172 @@ const SCREENS = {
   LESSON: "lesson",
 };
 
+// Material Icon component
+function MaterialIcon({ icon, className = "", style = {} }) {
+  return (
+    <span className={`material-icons ${className}`} style={style}>
+      {icon}
+    </span>
+  );
+}
+
+// ProgressTracker Component
+function ProgressTracker({ isVisible, onComplete }) {
+  const [progress, setProgress] = useState({
+    stages: [],
+    current_stage: null,
+    overall_progress: 0,
+    timestamp: null,
+  });
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    if (isVisible && !socket) {
+      // Initialize Socket.IO connection
+      const newSocket = io();
+
+      newSocket.on("connect", () => {
+        console.log("Connected to progress updates");
+      });
+
+      newSocket.on("progress_update", (progressData) => {
+        console.log("Progress update received:", progressData);
+        setProgress(progressData);
+
+        // Check if all stages are completed
+        const allCompleted = progressData.stages.every(
+          (stage) => stage.status === "completed"
+        );
+        if (allCompleted && onComplete) {
+          setTimeout(() => {
+            onComplete();
+          }, 1000); // Small delay to show completion
+        }
+      });
+
+      newSocket.on("disconnect", () => {
+        console.log("Disconnected from progress updates");
+      });
+
+      setSocket(newSocket);
+    }
+
+    // Cleanup on unmount or when not visible
+    return () => {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
+    };
+  }, [isVisible, socket, onComplete]);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  const getStageIcon = (status) => {
+    switch (status) {
+      case "completed":
+        return (
+          <MaterialIcon icon="check_circle" className="stage-icon-completed" />
+        );
+      case "running":
+        return <MaterialIcon icon="sync" className="stage-icon-running" />;
+      case "error":
+        return <MaterialIcon icon="error" className="stage-icon-error" />;
+      default:
+        return <MaterialIcon icon="schedule" className="stage-icon-pending" />;
+    }
+  };
+
+  const getStageClass = (status) => {
+    return `progress-stage ${status}`;
+  };
+
+  return (
+    <div className="progress-tracker">
+      <div className="progress-header">
+        <h2>
+          <MaterialIcon icon="psychology" className="header-icon" />
+          AI Agents Creating Your Course
+        </h2>
+        <div className="overall-progress">
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{ width: `${progress.overall_progress}%` }}
+            ></div>
+          </div>
+          <span className="progress-text">
+            {progress.overall_progress}% Complete
+          </span>
+        </div>
+      </div>
+
+      <div className="stages-container">
+        {progress.stages.map((stage, index) => (
+          <div key={stage.id} className={getStageClass(stage.status)}>
+            <div className="stage-header">
+              <div className="stage-icon-container">
+                {getStageIcon(stage.status)}
+              </div>
+              <div className="stage-info">
+                <h3>{stage.title}</h3>
+                <p>{stage.description}</p>
+                {stage.details && (
+                  <div className="stage-details">{stage.details}</div>
+                )}
+              </div>
+              <div className="stage-progress">
+                {stage.status === "running" && (
+                  <div className="spinner-small"></div>
+                )}
+              </div>
+            </div>
+
+            {stage.status === "running" && (
+              <div className="stage-progress-bar">
+                <div
+                  className="stage-progress-fill"
+                  style={{ width: `${stage.progress_percent}%` }}
+                ></div>
+              </div>
+            )}
+
+            {index < progress.stages.length - 1 && (
+              <div
+                className={`stage-connector ${
+                  stage.status === "completed" ? "completed" : ""
+                }`}
+              ></div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {progress.current_stage && (
+        <div className="current-activity">
+          <div className="activity-indicator">
+            <div className="pulse"></div>
+          </div>
+          <span>
+            Currently working on:{" "}
+            {progress.stages.find((s) => s.id === progress.current_stage)
+              ?.title || "Processing..."}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Home Component
 function Home({ onCourseCreate }) {
   const [subject, setSubject] = useState("");
   const [numLessons, setNumLessons] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showProgress, setShowProgress] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +184,7 @@ function Home({ onCourseCreate }) {
 
     setError("");
     setIsLoading(true);
+    setShowProgress(true);
 
     try {
       // Call the actual backend API
@@ -45,26 +206,40 @@ function Home({ onCourseCreate }) {
       }
 
       if (data.success && data.course_data) {
-        onCourseCreate({
+        // Don't immediately navigate, let progress tracker handle completion
+        // Store the course data for when progress completes
+        window.courseCreationResult = {
           courseData: data.course_data,
           subject: subject,
           numLessons: numLessons,
-        });
+        };
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (err) {
       setError(`Failed to create course: ${err.message}`);
       console.error("Course creation error:", err);
+      setShowProgress(false);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProgressComplete = () => {
+    setShowProgress(false);
+    if (window.courseCreationResult) {
+      onCourseCreate(window.courseCreationResult);
+      window.courseCreationResult = null;
     }
   };
 
   return (
     <div className="container">
       <div className="header">
-        <h1>🚀 AI Learning App</h1>
+        <h1>
+          <MaterialIcon icon="rocket_launch" className="header-icon" />
+          AI Learning App
+        </h1>
         <p>
           Create personalized courses on any subject with AI-powered content
         </p>
@@ -114,7 +289,7 @@ function Home({ onCourseCreate }) {
         </button>
       </form>
 
-      {isLoading && (
+      {isLoading && !showProgress && (
         <div className="loading">
           <div className="spinner"></div>
           <p>
@@ -123,6 +298,11 @@ function Home({ onCourseCreate }) {
           </p>
         </div>
       )}
+
+      <ProgressTracker
+        isVisible={showProgress}
+        onComplete={handleProgressComplete}
+      />
     </div>
   );
 }
@@ -136,7 +316,10 @@ function CourseOverview({ courseData, subject, onLessonSelect, onBackToHome }) {
   return (
     <div className="container">
       <div className="header">
-        <h1>📚 {subject}</h1>
+        <h1>
+          <MaterialIcon icon="library_books" className="header-icon" />
+          {subject}
+        </h1>
         <p>
           {lessons.length} Lesson{lessons.length > 1 ? "s" : ""} Created
         </p>
@@ -214,12 +397,18 @@ function Lesson({
       <div className="lesson-content-wrapper">
         <div className="lesson-section">
           <div className="lesson-main-content">
-            <h3>📖 Lesson Content</h3>
+            <h3>
+              <MaterialIcon icon="menu_book" className="section-icon" />
+              Lesson Content
+            </h3>
             <div className="lesson-text">{lesson.main_lesson_text}</div>
           </div>
 
           <div className="key-concepts">
-            <h3>🎯 Key Concepts</h3>
+            <h3>
+              <MaterialIcon icon="lightbulb" className="section-icon" />
+              Key Concepts
+            </h3>
             <div className="concepts-list">
               {lesson.key_concepts.map((concept, idx) => (
                 <span key={idx} className="concept-tag">
@@ -230,7 +419,10 @@ function Lesson({
           </div>
 
           <div className="key-terms">
-            <h3>📚 Key Terms</h3>
+            <h3>
+              <MaterialIcon icon="book" className="section-icon" />
+              Key Terms
+            </h3>
             <div className="terms-list">
               {Object.entries(lesson.key_terms).map(([term, definition]) => (
                 <div key={term} className="term">

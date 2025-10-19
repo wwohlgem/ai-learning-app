@@ -5,18 +5,41 @@ import os
 import json
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 from crew import LearningAppCrew
+from src.progress_tracker import progress_tracker
 
 app = Flask(__name__, 
             template_folder='../frontend/public',
             static_folder='../frontend/public')
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize the crew
 crew = LearningAppCrew()
+
+# WebSocket event handlers
+@socketio.on('connect')
+def handle_connect():
+    """Handle client connection"""
+    print('Client connected')
+    # Send current progress state to newly connected client
+    emit('progress_update', progress_tracker.get_current_progress())
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Handle client disconnection"""
+    print('Client disconnected')
+
+def broadcast_progress(progress_data):
+    """Broadcast progress updates to all connected clients"""
+    socketio.emit('progress_update', progress_data)
+
+# Register progress tracker callback
+progress_tracker.add_callback(broadcast_progress)
 
 @app.route('/')
 def index():
@@ -46,6 +69,9 @@ def create_course():
         
         if not isinstance(num_lessons, int) or num_lessons < 1 or num_lessons > 3:
             return jsonify({'error': 'Number of lessons must be between 1 and 3'}), 400
+        
+        # Reset progress tracker for new course creation
+        progress_tracker.reset()
         
         # Create course using CrewAI
         print(f"Creating course for subject: {subject}, lessons: {num_lessons}")
@@ -123,6 +149,11 @@ def get_output(filename):
     except Exception as e:
         return jsonify({'error': f'Failed to get output: {str(e)}'}), 500
 
+@app.route('/api/progress')
+def get_progress():
+    """Get current progress state"""
+    return jsonify(progress_tracker.get_current_progress())
+
 if __name__ == '__main__':
     print("Starting AI Learning App server...")
     print("Frontend available at: http://localhost:5000")
@@ -130,5 +161,8 @@ if __name__ == '__main__':
     print("  POST /api/create-course - Create a new course")
     print("  GET /api/outputs - List all generated outputs")
     print("  GET /api/outputs/<filename> - Get specific output")
+    print("  GET /api/progress - Get current progress state")
+    print("WebSocket events:")
+    print("  progress_update - Real-time progress updates")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)

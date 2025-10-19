@@ -5,6 +5,7 @@ function Home({ onCourseCreate }) {
   const [numLessons, setNumLessons] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showProgress, setShowProgress] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +17,7 @@ function Home({ onCourseCreate }) {
 
     setError("");
     setIsLoading(true);
+    setShowProgress(true);
 
     try {
       // Call the actual backend API
@@ -37,19 +39,30 @@ function Home({ onCourseCreate }) {
       }
 
       if (data.success && data.course_data) {
-        onCourseCreate({
+        // Don't immediately navigate, let progress tracker handle completion
+        // Store the course data for when progress completes
+        window.courseCreationResult = {
           courseData: data.course_data,
           subject: subject,
           numLessons: numLessons,
-        });
+        };
       } else {
         throw new Error("Invalid response from server");
       }
     } catch (err) {
       setError(`Failed to create course: ${err.message}`);
       console.error("Course creation error:", err);
+      setShowProgress(false);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProgressComplete = () => {
+    setShowProgress(false);
+    if (window.courseCreationResult) {
+      onCourseCreate(window.courseCreationResult);
+      window.courseCreationResult = null;
     }
   };
 
@@ -106,7 +119,7 @@ function Home({ onCourseCreate }) {
         </button>
       </form>
 
-      {isLoading && (
+      {isLoading && !showProgress && (
         <div className="loading">
           <div className="spinner"></div>
           <p>
@@ -115,6 +128,11 @@ function Home({ onCourseCreate }) {
           </p>
         </div>
       )}
+
+      <ProgressTracker
+        isVisible={showProgress}
+        onComplete={handleProgressComplete}
+      />
     </div>
   );
 }
