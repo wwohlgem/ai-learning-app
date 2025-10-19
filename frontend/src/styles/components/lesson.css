@@ -259,6 +259,115 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Assessment Section */
+.assessment-section {
+  background: var(--color-surface);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-gray-200);
+  margin-top: var(--space-6);
+  text-align: center;
+}
+
+.assessment-prompt {
+  color: var(--color-gray-700);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--space-4);
+  font-weight: 500;
+  margin: 0 0 var(--space-4) 0;
+}
+
+.assessment-btn {
+  background: linear-gradient(
+    135deg,
+    var(--color-success) 0%,
+    var(--color-success-dark) 100%
+  );
+  color: white;
+  padding: var(--space-4) var(--space-6);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+}
+
+.assessment-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  filter: brightness(1.05);
+}
+
+.assessment-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.assessment-btn .btn-icon {
+  font-size: 20px;
+}
+
+/* Inline Assessment Section (smaller, part of navigation) */
+.assessment-section-inline {
+  background: var(--color-surface-alt);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-200);
+  margin: var(--space-4) 0;
+  text-align: center;
+}
+
+.assessment-prompt-small {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-3);
+  font-weight: 400;
+  margin: 0 0 var(--space-3) 0;
+}
+
+.assessment-btn-small {
+  background: linear-gradient(
+    135deg,
+    var(--color-success) 0%,
+    var(--color-success-dark) 100%
+  );
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+}
+
+.assessment-btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.05);
+}
+
+.assessment-btn-small:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.assessment-btn-small .btn-icon {
+  font-size: 16px;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .lesson-content-wrapper {
@@ -310,5 +419,15 @@
     width: 100%;
     margin: 0 auto var(--space-4) auto;
     padding: 0;
+  }
+
+  .assessment-section {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .assessment-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

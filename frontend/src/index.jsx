@@ -467,6 +467,21 @@ function Lesson({
             </p>
           </div>
 
+          {lessonIndex === totalLessons - 1 && (
+            <div className="assessment-section-inline">
+              <p className="assessment-prompt-small">
+                You've reached the last lesson. Ready for the assessment?
+              </p>
+              <button
+                className="assessment-btn-small"
+                onClick={() => console.log("Assessment clicked")}
+              >
+                <MaterialIcon icon="quiz" className="btn-icon" />
+                Build Assessment
+              </button>
+            </div>
+          )}
+
           <div className="nav-buttons-bottom">
             {lessonIndex > 0 && (
               <button className="nav-btn" onClick={onPreviousLesson}>

@@ -10,6 +10,10 @@
   --color-secondary: #798697;
   --color-accent: #798697;
 
+  /* Success colors for assessment button */
+  --color-success: #10b981;
+  --color-success-dark: #059669;
+
   /* Neutral colors */
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
