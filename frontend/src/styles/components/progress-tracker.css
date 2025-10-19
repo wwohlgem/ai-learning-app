@@ -39,7 +39,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #007bff, #28a745);
+  background: linear-gradient(90deg, #9ca3af, #6b7280);
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -70,14 +70,14 @@
 }
 
 .progress-stage.running {
-  border-color: #007bff;
-  background: #e3f2fd;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+  border-color: #6b7280;
+  background: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
 }
 
 .progress-stage.completed {
-  border-color: #28a745;
-  background: #e8f5e8;
+  border-color: #4b5563;
+  background: #f9fafb;
 }
 
 .progress-stage.error {
@@ -143,7 +143,7 @@
 
 .stage-progress-fill {
   height: 100%;
-  background: #007bff;
+  background: #6b7280;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -159,7 +159,7 @@
 }
 
 .stage-connector.completed {
-  background: #28a745;
+  background: #4b5563;
 }
 
 .current-activity {
@@ -206,7 +206,7 @@
 
 .spinner-small {
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #007bff;
+  border-top: 2px solid #6b7280;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -231,12 +231,12 @@
 }
 
 .stage-icon-completed {
-  color: #28a745;
+  color: #4b5563;
   font-size: 24px;
 }
 
 .stage-icon-running {
-  color: #007bff;
+  color: #6b7280;
   font-size: 24px;
   animation: spin 2s linear infinite;
 }

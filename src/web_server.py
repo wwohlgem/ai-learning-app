@@ -131,6 +131,77 @@ def list_outputs():
     except Exception as e:
         return jsonify({'error': f'Failed to list outputs: {str(e)}'}), 500
 
+@app.route('/api/courses')
+def get_courses():
+    """Get all final courses from outputs directory"""
+    try:
+        outputs_dir = Path(__file__).parent.parent / 'outputs'
+        if not outputs_dir.exists():
+            return jsonify({'courses': []})
+        
+        courses = []
+        for file_path in outputs_dir.glob('final_course_*.json'):
+            try:
+                with open(file_path, 'r') as f:
+                    content = f.read().strip()
+                    
+                # Handle files that have markdown code block wrappers
+                if content.startswith('```json'):
+                    # Remove the markdown wrapper
+                    lines = content.split('\n')
+                    # Remove first line (```json) and last line (```)
+                    if lines[-1].strip() == '```':
+                        content = '\n'.join(lines[1:-1])
+                    else:
+                        content = '\n'.join(lines[1:])
+                
+                data = json.loads(content)
+                
+                # Extract course info from filename
+                filename = file_path.name
+                # Extract subject from the course data or filename
+                subject = "Unknown Subject"
+                if 'course' in data and data['course']:
+                    # Try to extract subject from first lesson title or use filename
+                    first_lesson = next(iter(data['course'].values()), {})
+                    if 'title' in first_lesson:
+                        title_parts = first_lesson['title'].split()
+                        if len(title_parts) > 2 and title_parts[0].lower() == 'introduction' and title_parts[1].lower() == 'to':
+                            subject = ' '.join(title_parts[2:])
+                        else:
+                            # Fallback to extracting from filename
+                            subject_from_filename = filename.replace('final_course_', '').split('_')[0]
+                            subject = subject_from_filename.replace('_', ' ').title()
+                    else:
+                        # Fallback to extracting from filename
+                        subject_from_filename = filename.replace('final_course_', '').split('_')[0]
+                        subject = subject_from_filename.replace('_', ' ').title()
+                
+                # Count lessons
+                lesson_count = len(data.get('course', {}))
+                
+                # Get creation time
+                created_time = file_path.stat().st_mtime
+                
+                courses.append({
+                    'id': filename.replace('.json', ''),
+                    'filename': filename,
+                    'subject': subject,
+                    'lesson_count': lesson_count,
+                    'created': created_time,
+                    'course_data': data
+                })
+            except Exception as e:
+                print(f"Error processing course file {file_path}: {e}")
+                continue
+        
+        # Sort by creation time, newest first
+        courses.sort(key=lambda x: x['created'], reverse=True)
+        return jsonify({'courses': courses})
+        
+    except Exception as e:
+        return jsonify({'error': f'Failed to get courses: {str(e)}'}), 500
+
 @app.route('/api/outputs/<filename>')
 def get_output(filename):
     """Get a specific output file"""

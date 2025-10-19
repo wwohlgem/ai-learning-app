@@ -47,13 +47,51 @@ function Lesson({
           <div className="lesson-main-content">
             <h3>📖 Lesson Content</h3>
             <div className="lesson-text">
-              {lesson.main_lesson_text.includes("\n\n") ? (
-                lesson.main_lesson_text
-                  .split("\n\n")
-                  .map((paragraph, index) => <p key={index}>{paragraph}</p>)
-              ) : (
-                <p>{lesson.main_lesson_text}</p>
-              )}
+              {(() => {
+                // Split by double newlines first, then handle single newlines within paragraphs
+                const paragraphs = lesson.main_lesson_text.split("\n\n");
+
+                // If we only get one paragraph, try splitting by single newlines and group them intelligently
+                if (paragraphs.length === 1) {
+                  const lines = lesson.main_lesson_text.split("\n");
+                  const smartParagraphs = [];
+                  let currentParagraph = [];
+
+                  lines.forEach((line, index) => {
+                    const trimmedLine = line.trim();
+                    if (trimmedLine === "") {
+                      // Empty line - end current paragraph if it has content
+                      if (currentParagraph.length > 0) {
+                        smartParagraphs.push(currentParagraph.join(" "));
+                        currentParagraph = [];
+                      }
+                    } else {
+                      currentParagraph.push(trimmedLine);
+                    }
+                  });
+
+                  // Add any remaining content as the last paragraph
+                  if (currentParagraph.length > 0) {
+                    smartParagraphs.push(currentParagraph.join(" "));
+                  }
+
+                  return smartParagraphs.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ));
+                }
+
+                // Handle normally split paragraphs
+                return paragraphs.map((paragraph, index) => (
+                  <p key={index}>
+                    {paragraph.split("\n").map((line, lineIndex) => (
+                      <span key={lineIndex}>
+                        {line}
+                        {lineIndex < paragraph.split("\n").length - 1 && <br />}
+                      </span>
+                    ))}
+                  </p>
+                ));
+              })()}
             </div>
           </div>
         </div>

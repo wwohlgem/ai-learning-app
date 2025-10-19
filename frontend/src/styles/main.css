@@ -5,6 +5,7 @@
 
 /* Component-specific styles */
 @import url("./components/home.css");
+@import url("./components/course-carousel.css");
 @import url("./components/lesson.css");
 @import url("./components/course-overview.css");
 @import url("./components/progress-tracker.css");

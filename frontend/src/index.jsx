@@ -245,6 +245,8 @@ function Home({ onCourseCreate }) {
         </p>
       </div>
 
+      <CourseCarousel onCourseSelect={onCourseCreate} />
+
       <form onSubmit={handleSubmit} className="course-form">
         <div className="form-group">
           <label htmlFor="subject">What subject would you like to learn?</label>
@@ -401,7 +403,18 @@ function Lesson({
               <MaterialIcon icon="menu_book" className="section-icon" />
               Lesson Content
             </h3>
-            <div className="lesson-text">{lesson.main_lesson_text}</div>
+            <div className="lesson-text">
+              {lesson.main_lesson_text.split("\n\n").map((paragraph, index) => (
+                <p key={index} style={{ marginBottom: "1rem" }}>
+                  {paragraph.split("\n").map((line, lineIndex) => (
+                    <span key={lineIndex}>
+                      {line}
+                      {lineIndex < paragraph.split("\n").length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+              ))}
+            </div>
           </div>
 
           <div className="key-concepts">
@@ -455,25 +468,21 @@ function Lesson({
           </div>
 
           <div className="nav-buttons-bottom">
-            <div className="nav-left">
-              {lessonIndex > 0 && (
-                <button className="nav-btn" onClick={onPreviousLesson}>
-                  ← Previous Lesson
-                </button>
-              )}
-            </div>
+            {lessonIndex > 0 && (
+              <button className="nav-btn" onClick={onPreviousLesson}>
+                ← Previous Lesson
+              </button>
+            )}
 
-            <div className="nav-right">
-              {lessonIndex < totalLessons - 1 ? (
-                <button className="nav-btn primary" onClick={onNextLesson}>
-                  Next Lesson →
-                </button>
-              ) : (
-                <button className="nav-btn primary" onClick={onBackToHome}>
-                  Complete Course & Back to Home
-                </button>
-              )}
-            </div>
+            {lessonIndex < totalLessons - 1 ? (
+              <button className="nav-btn primary" onClick={onNextLesson}>
+                Next Lesson →
+              </button>
+            ) : (
+              <button className="nav-btn primary" onClick={onBackToHome}>
+                Complete Course & Back to Home
+              </button>
+            )}
           </div>
         </div>
       </div>

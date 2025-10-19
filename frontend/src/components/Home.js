@@ -75,6 +75,8 @@ function Home({ onCourseCreate }) {
         </p>
       </div>
 
+      <CourseCarousel onCourseSelect={onCourseCreate} />
+
       <form onSubmit={handleSubmit} className="course-form">
         <div className="form-group">
           <label htmlFor="subject">What subject would you like to learn?</label>
